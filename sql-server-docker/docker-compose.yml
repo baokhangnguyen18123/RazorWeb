@@ -1,0 +1,19 @@
+services:
+  xtlab-mssql:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: sqlserver-xtlab
+    restart: always
+    user: root
+    environment:
+      SA_PASSWORD: "Password@123"
+      ACCEPT_EULA: "Y"
+    ports:
+      - "1433:1433"
+    volumes:
+      - mssqlvolume:/var/opt/mssql/data
+      # - ./bk:/var/opt/mssql/backup
+
+volumes:
+  mssqlvolume:
+
+#"Server=localhost,1433;Database=TestDb;User Id=sa;Password=Password@123;TrustServerCertificate=True"
