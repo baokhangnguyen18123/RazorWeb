@@ -34,3 +34,7 @@ app.MapRazorPages()
    .WithStaticAssets();
 
 app.Run();
+
+/*
+    dotnet aspnet-codegenerator razorpage -m CS58.Models.Article -dc CS58.Models.MyBlogContext -outDir Pages/Blog -udl --referenceScriptLibraries
+*/

@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 
 namespace CS58.Models;
+// CS58.Models.MyBlogContext
 public class MyBlogContext : DbContext
 {
     public MyBlogContext(DbContextOptions<MyBlogContext> options) : base(options)
