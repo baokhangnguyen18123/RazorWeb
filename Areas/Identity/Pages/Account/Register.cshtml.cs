@@ -19,6 +19,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
+using System.ComponentModel;
 
 namespace CS58.Areas.Identity.Pages.Account
 {
@@ -75,8 +76,8 @@ namespace CS58.Areas.Identity.Pages.Account
             ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
             ///     directly from your code. This API may change or be removed in future releases.
             /// </summary>
-            [Required]
-            [EmailAddress]
+            [Required(ErrorMessage ="Phải nhập {0}")]
+            [EmailAddress (ErrorMessage ="Sai định dạng Email")]
             [Display(Name = "Email")]
             public string Email { get; set; }
 
@@ -85,9 +86,9 @@ namespace CS58.Areas.Identity.Pages.Account
             ///     directly from your code. This API may change or be removed in future releases.
             /// </summary>
             [Required]
-            [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
+            [StringLength(100, ErrorMessage = "{0} phải dài từ {2} cho đến {1} ký tự.", MinimumLength = 6)]
             [DataType(DataType.Password)]
-            [Display(Name = "Password")]
+            [Display(Name = "Mật khẩu")]
             public string Password { get; set; }
 
             /// <summary>
@@ -95,9 +96,16 @@ namespace CS58.Areas.Identity.Pages.Account
             ///     directly from your code. This API may change or be removed in future releases.
             /// </summary>
             [DataType(DataType.Password)]
-            [Display(Name = "Confirm password")]
-            [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
+            [Display(Name = "Xác nhận mật khẩu")]
+            [Compare("Password", ErrorMessage = "Mật khẩu không trùng khớp")]
             public string ConfirmPassword { get; set; }
+
+
+            [Display(Name ="Tên tài khoản")]
+            [Required(ErrorMessage ="Phải nhập {0}")]
+            [StringLength(100, ErrorMessage = "{0} phải dài từ {2} cho đến {1} ký tự.", MinimumLength = 3)]
+            public string UserName {get;set;}
+
         }
 
 
@@ -115,7 +123,7 @@ namespace CS58.Areas.Identity.Pages.Account
             {
                 var user = CreateUser();
 
-                await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
+                await _userStore.SetUserNameAsync(user, Input.UserName, CancellationToken.None);
                 await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
                 var result = await _userManager.CreateAsync(user, Input.Password);
 
@@ -124,6 +132,7 @@ namespace CS58.Areas.Identity.Pages.Account
                     _logger.LogInformation("User created a new account with password.");
 
                     var userId = await _userManager.GetUserIdAsync(user);
+                    //Phát sinh token => Xác nhận Email
                     var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                     code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
                     var callbackUrl = Url.Page(
@@ -132,8 +141,8 @@ namespace CS58.Areas.Identity.Pages.Account
                         values: new { area = "Identity", userId = userId, code = code, returnUrl = returnUrl },
                         protocol: Request.Scheme);
 
-                    await _emailSender.SendEmailAsync(Input.Email, "Confirm your email",
-                        $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
+                    await _emailSender.SendEmailAsync(Input.Email, "Xác nhận địa chỉ Email",
+                        $"Bạn đã đăng kí tài khoản Razor Web <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>Bấm vào đây để kích hoạt tài khoản</a>.");
 
                     if (_userManager.Options.SignIn.RequireConfirmedAccount)
                     {
