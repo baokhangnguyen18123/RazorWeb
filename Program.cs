@@ -18,10 +18,32 @@ builder.Services.AddDbContext<MyBlogContext>(option =>
 });
 builder.Services.AddIdentity<AppUser, IdentityRole>()
 .AddEntityFrameworkStores<MyBlogContext>()
-.AddDefaultTokenProviders();
+.AddDefaultTokenProviders()
+.AddDefaultUI();
 // builder.Services.AddDefaultIdentity<AppUser>()
 // .AddEntityFrameworkStores<MyBlogContext>()
 // .AddDefaultTokenProviders();
+
+//
+builder.Services.AddAuthentication()
+.AddGoogle(options =>
+{
+    var googleConfig = builder.Configuration.GetSection("Authentication:Google");
+    options.ClientId = googleConfig["ClientId"];
+    options.ClientSecret = googleConfig["ClientSecret"];
+    options.CallbackPath = "/login-google";
+})
+// .AddTwitter()
+.AddFacebook(options =>
+{
+    // Lấy cấu hình từ appsettings.json
+    options.AppId = builder.Configuration["Authentication:Facebook:AppId"];
+    options.AppSecret = builder.Configuration["Authentication:Facebook:AppSecret"];
+    options.CallbackPath = "/login-facebook";
+})
+// .AddMicrosoftAccount()
+;
+
 
 // Truy cập IdentityOptions
 builder.Services.Configure<IdentityOptions> (options => {

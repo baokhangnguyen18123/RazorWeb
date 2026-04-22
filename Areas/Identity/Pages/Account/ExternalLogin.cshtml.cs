@@ -18,6 +18,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
+using System.Linq;
 
 namespace CS58.Areas.Identity.Pages.Account
 {
@@ -46,52 +47,37 @@ namespace CS58.Areas.Identity.Pages.Account
             _emailSender = emailSender;
         }
 
-        /// <summary>
-        ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-        ///     directly from your code. This API may change or be removed in future releases.
-        /// </summary>
         [BindProperty]
         public InputModel Input { get; set; }
 
-        /// <summary>
-        ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-        ///     directly from your code. This API may change or be removed in future releases.
-        /// </summary>
         public string ProviderDisplayName { get; set; }
 
-        /// <summary>
-        ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-        ///     directly from your code. This API may change or be removed in future releases.
-        /// </summary>
         public string ReturnUrl { get; set; }
 
-        /// <summary>
-        ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-        ///     directly from your code. This API may change or be removed in future releases.
-        /// </summary>
         [TempData]
         public string ErrorMessage { get; set; }
 
-        /// <summary>
-        ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-        ///     directly from your code. This API may change or be removed in future releases.
-        /// </summary>
         public class InputModel
         {
-            /// <summary>
-            ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-            ///     directly from your code. This API may change or be removed in future releases.
-            /// </summary>
             [Required]
             [EmailAddress]
+            [Display(Name = "Địa chỉ email")]
             public string Email { get; set; }
         }
-        
+
         public IActionResult OnGet() => RedirectToPage("./Login");
 
-        public IActionResult OnPost(string provider, string returnUrl = null)
+        // Post yêu cầu login bằng dịch vụ ngoài
+        public async Task<IActionResult> OnPost(string provider, string returnUrl = null)
         {
-            // Request a redirect to the external login provider.
+            // Kiểm tra yêu cầu dịch vụ provider tồn tại
+            var listprovider = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
+            var provider_process = listprovider.Find((m) => m.Name == provider);
+            if (provider_process == null)
+            {
+                return NotFound("Dịch vụ không chính xác: " + provider);
+            }
+
             var redirectUrl = Url.Page("./ExternalLogin", pageHandler: "Callback", values: new { returnUrl });
             var properties = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
             return new ChallengeResult(provider, properties);
@@ -102,17 +88,18 @@ namespace CS58.Areas.Identity.Pages.Account
             returnUrl = returnUrl ?? Url.Content("~/");
             if (remoteError != null)
             {
-                ErrorMessage = $"Error from external provider: {remoteError}";
-                return RedirectToPage("./Login", new { ReturnUrl = returnUrl });
-            }
-            var info = await _signInManager.GetExternalLoginInfoAsync();
-            if (info == null)
-            {
-                ErrorMessage = "Error loading external login information.";
+                ErrorMessage = $"Lỗi từ nhà cung cấp bên ngoài: {remoteError}";
                 return RedirectToPage("./Login", new { ReturnUrl = returnUrl });
             }
 
-            // Sign in the user with this external login provider if the user already has a login.
+            var info = await _signInManager.GetExternalLoginInfoAsync();
+            if (info == null)
+            {
+                ErrorMessage = "Lỗi khi tải thông tin đăng nhập bên ngoài.";
+                return RedirectToPage("./Login", new { ReturnUrl = returnUrl });
+            }
+
+            // Đăng nhập bằng thông tin LoginProvider, ProviderKey từ info cung cấp bởi dịch vụ ngoài
             var result = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, isPersistent: false, bypassTwoFactor: true);
             if (result.Succeeded)
             {
@@ -125,7 +112,14 @@ namespace CS58.Areas.Identity.Pages.Account
             }
             else
             {
-                // If the user does not have an account, then ask the user to create an account.
+                // Đã có Account, đã liên kết với tài khoản ngoài - nhưng không đăng nhập được (có thể do chưa kích hoạt email)
+                var userExisted = await _userManager.FindByLoginAsync(info.LoginProvider, info.ProviderKey);
+                if (userExisted != null)
+                {
+                    return RedirectToPage("./RegisterConfirmation", new { Email = userExisted.Email });
+                }
+
+                // Chưa có Account liên kết với tài khoản ngoài
                 ReturnUrl = returnUrl;
                 ProviderDisplayName = info.ProviderDisplayName;
                 if (info.Principal.HasClaim(c => c.Type == ClaimTypes.Email))
@@ -142,29 +136,71 @@ namespace CS58.Areas.Identity.Pages.Account
         public async Task<IActionResult> OnPostConfirmationAsync(string returnUrl = null)
         {
             returnUrl = returnUrl ?? Url.Content("~/");
-            // Get the information about the user from the external login provider
             var info = await _signInManager.GetExternalLoginInfoAsync();
             if (info == null)
             {
-                ErrorMessage = "Error loading external login information during confirmation.";
+                ErrorMessage = "Lỗi khi tải thông tin đăng nhập bên ngoài trong quá trình xác nhận.";
                 return RedirectToPage("./Login", new { ReturnUrl = returnUrl });
             }
 
             if (ModelState.IsValid)
             {
-                var user = CreateUser();
+                string externalEmail = null;
+                if (info.Principal.HasClaim(c => c.Type == ClaimTypes.Email))
+                {
+                    externalEmail = info.Principal.FindFirstValue(ClaimTypes.Email);
+                }
 
+                var userWithExternalEmail = (externalEmail != null) ? await _userManager.FindByEmailAsync(externalEmail) : null;
+
+                // 1. Xử lý khi có thông tin về email từ info, đồng thời có user với email đó trong DB
+                if ((userWithExternalEmail != null) && (Input.Email == externalEmail))
+                {
+                    // Xác nhận email luôn nếu chưa xác nhận
+                    if (!userWithExternalEmail.EmailConfirmed)
+                    {
+                        var codeactive = await _userManager.GenerateEmailConfirmationTokenAsync(userWithExternalEmail);
+                        await _userManager.ConfirmEmailAsync(userWithExternalEmail, codeactive);
+                    }
+
+                    // Thực hiện liên kết info và user
+                    var resultAdd = await _userManager.AddLoginAsync(userWithExternalEmail, info);
+                    if (resultAdd.Succeeded)
+                    {
+                        await _signInManager.SignInAsync(userWithExternalEmail, isPersistent: false, info.LoginProvider);
+                        return LocalRedirect(returnUrl);
+                    }
+                    else
+                    {
+                        ModelState.AddModelError(string.Empty, "Không thể liên kết tài khoản.");
+                        return Page();
+                    }
+                }
+
+                // 2. Tài khoản chưa có, tạo tài khoản mới
+                var user = CreateUser();
                 await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
                 await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
 
                 var result = await _userManager.CreateAsync(user);
                 if (result.Succeeded)
                 {
+                    // Liên kết tài khoản ngoài với tài khoản vừa tạo
                     result = await _userManager.AddLoginAsync(user, info);
                     if (result.Succeeded)
                     {
-                        _logger.LogInformation("User created an account using {Name} provider.", info.LoginProvider);
+                        _logger.LogInformation("Đã tạo user mới từ thông tin {Name}.", info.LoginProvider);
 
+                        // Email tạo tài khoản và email từ info giống nhau -> xác thực email luôn
+                        if (Input.Email == externalEmail)
+                        {
+                            var codeactive = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                            await _userManager.ConfirmEmailAsync(user, codeactive);
+                            await _signInManager.SignInAsync(user, isPersistent: false, info.LoginProvider);
+                            return LocalRedirect(returnUrl);
+                        }
+
+                        // Trường hợp Email nhập vào khác Email từ Google, yêu cầu gửi mail xác thực
                         var userId = await _userManager.GetUserIdAsync(user);
                         var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                         code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
@@ -174,10 +210,9 @@ namespace CS58.Areas.Identity.Pages.Account
                             values: new { area = "Identity", userId = userId, code = code },
                             protocol: Request.Scheme);
 
-                        await _emailSender.SendEmailAsync(Input.Email, "Confirm your email",
-                            $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
+                        await _emailSender.SendEmailAsync(Input.Email, "Xác nhận địa chỉ email",
+                            $"Hãy xác nhận địa chỉ email bằng cách <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>bấm vào đây</a>.");
 
-                        // If account confirmation is required, we need to show the link if we don't have a real email sender
                         if (_userManager.Options.SignIn.RequireConfirmedAccount)
                         {
                             return RedirectToPage("./RegisterConfirmation", new { Email = Input.Email });

@@ -3,14 +3,20 @@
 
 @{
     ViewData["Title"] = "Đăng nhập";
+    @* this.TempData["ErrorMessage"] *@
+    var thongBao = TempData["ErrorMessage"];
 }
 
 <h1>@ViewData["Title"]</h1>
+@if (TempData.ContainsKey("ErrorMessage")){
+    <partial name="/Areas/Identity/Pages/Account/_StatusMessage.cshtml" model = "thongBao" />                
+
+}
 <div class="row">
     <div class="col-md-4">
         <section>
             <form id="account" method="post">
-                <hr />
+
                 <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
                 <div class="form-floating mb-3">
                     <input asp-for="Input.UserNameOrEmail" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com" />
