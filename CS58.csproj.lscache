@@ -97,6 +97,8 @@ Migrations/
  20260401090648_addIdentity.Designer.cs
  20260401091018_updateUser.cs
  20260401091018_updateUser.Designer.cs
+ 20260423133621_UpdateUser2.cs
+ 20260423133621_UpdateUser2.Designer.cs
  MyBlogContextModelSnapshot.cs
 Models/
  AppUser.cs

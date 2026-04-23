@@ -8,6 +8,7 @@ using System.Text;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 using CS58.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -16,6 +17,7 @@ using Microsoft.AspNetCore.WebUtilities;
 
 namespace CS58.Areas.Identity.Pages.Account.Manage
 {
+    [Authorize]
     public class EmailModel : PageModel
     {
         private readonly UserManager<AppUser> _userManager;
@@ -70,7 +72,7 @@ namespace CS58.Areas.Identity.Pages.Account.Manage
             /// </summary>
             [Required]
             [EmailAddress]
-            [Display(Name = "New email")]
+            [Display(Name = "Địa chỉ Email mới")]
             public string NewEmail { get; set; }
         }
 
@@ -129,11 +131,11 @@ namespace CS58.Areas.Identity.Pages.Account.Manage
                     "Confirm your email",
                     $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
 
-                StatusMessage = "Confirmation link to change email sent. Please check your email.";
+                StatusMessage = "Yêu cầu thay đổi email đã được gửi. Vui lòng kiểm tra email của bạn.";
                 return RedirectToPage();
             }
 
-            StatusMessage = "Your email is unchanged.";
+            StatusMessage = "Email của bạn không thay đổi.";
             return RedirectToPage();
         }
 
@@ -163,9 +165,9 @@ namespace CS58.Areas.Identity.Pages.Account.Manage
             await _emailSender.SendEmailAsync(
                 email,
                 "Confirm your email",
-                $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
+                $"Nhấn vào <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'> đây</a> để xác nhận email của bạn: .");
 
-            StatusMessage = "Verification email sent. Please check your email.";
+            StatusMessage = "Email xác nhận đã được gửi. Vui lòng kiểm tra email của bạn.";
             return RedirectToPage();
         }
     }
