@@ -1,0 +1,50 @@
+@page "/admin/members"
+@model CS58.Areas.Admin.Pages.User.IndexModel
+@{
+    ViewData["Title"] = "Danh sách các thành viên";
+}
+
+<h3>@ViewData["Title"]</h3>
+<partial name="_StatusMessage" model="@Model.StatusMessage" />
+<p>Tổng số thành viên @Model.totalUsers</p>
+<div class="mb-2">
+    <a asp-page="./Create" class="btn btn-success">Thêm thành viên</a>
+    <a asp-page="../User/Index" class="btn btn-primary" >Quản lí thành viên</a>
+</div>
+<table class="table">
+    <tr>
+        <th>User</th>
+        <th>Vai trò</th>
+        <th>Tác vụ</th>
+    </tr>
+    @foreach (var user in Model.users)
+    {
+        <tr>
+            <td>@user.UserName</td>
+            <td>
+                @if(string.IsNullOrEmpty(user.RoleNames))
+                {
+                    <a asp-page="./AddRole" asp-route-id="@user.Id" class="text-dark" >+ Thêm vai trò</a>
+                }
+                else
+                {
+                    <a asp-page="./AddRole" asp-route-id="@user.Id" class="text-dark" >@user.RoleNames</a>
+                }
+            </td>
+            <td>
+                
+                <a asp-page="./SetPassword" asp-route-id="@user.Id" class="btn btn-warning">Đặt mật khẩu</a>
+            </td>
+        </tr>
+    }
+</table>
+@* dotnet new page -n Create -o Areas/Admin/Pages/Role --namespace CS58.Areas.Admin.Pages.Role *@
+@{
+    var pagingModel = new NBK.Helper.PagingModel(){
+        currentPage=Model.currentPage,
+        countPages=Model.countPage,
+        generateUrl = (int? p) => Url.Page("./Index", new {p=p})
+    };
+}
+
+<partial name="_Paging" model="@pagingModel"/>

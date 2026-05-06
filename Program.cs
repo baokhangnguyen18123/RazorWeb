@@ -1,4 +1,5 @@
 using System.Configuration;
+using App.Services;
 using CS58.Models;
 using CS58.Services;
 using Microsoft.AspNetCore.Identity;
@@ -44,6 +45,7 @@ builder.Services.AddAuthentication()
 // .AddMicrosoftAccount()
 ;
 
+builder.Services.AddSingleton<IdentityErrorDescriber, AppIdentityErrorDescriber>();
 
 // Truy cập IdentityOptions
 builder.Services.Configure<IdentityOptions> (options => {

@@ -1,0 +1,46 @@
+﻿@page "/admin/edit-role/{id}"
+@model CS58.Areas.Admin.Pages.Role.EditModel
+@{
+    ViewData["Title"] = "Chỉnh sửa vai trò";
+}
+
+
+<partial name="_StatusMessage" model="@Model.StatusMessage" />
+
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h4 class="card-title mb-0">
+                    <i class="bi bi-plus-circle me-2"></i>@ViewData["Title"]
+                </h4>
+            </div>
+            <div class="card-body p-4">
+                <form method="post">
+                    <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
+
+                    <div class="form-floating mb-3">
+                        <input asp-for="Input.Name" class="form-control" placeholder="Nhập tên Role" aria-required="true"/>
+                        <label asp-for="Input.Name" class="form-label"></label>
+                        <span asp-validation-for="Input.Name" class="text-danger small"></span>
+                    </div>
+
+                    <div class="d-flex justify-content-center gap-2">
+                        <button type="submit" class="btn btn-primary btn">
+                            <i class="bi bi-save me-1"></i> Cập nhật
+                        </button>
+                        <a class="btn btn-secondary btn" asp-page="./Index">
+                            <i class="bi bi-arrow-left me-1"></i> Quay lại danh sách
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+
+}

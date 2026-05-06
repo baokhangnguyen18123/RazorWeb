@@ -1,0 +1,29 @@
+@page "/admin/role"
+@model CS58.Areas.Admin.Pages.Role.IndexModel
+@{
+    ViewData["Title"] = "Danh sách vai trò";
+}
+
+<h3>@ViewData["Title"]</h3>
+<partial name="_StatusMessage" model="@Model.StatusMessage" />
+<div class="mb-2">
+    <a asp-page="./Create" class="btn btn-success">Thêm vai trò</a>
+    <a asp-page="../User/Index" class="btn btn-primary" >Quản lí thành viên</a>
+</div>
+<table class="table">
+    <tr>
+        <th>Vai trò</th>
+        <th>Tác vụ</th>
+    </tr>
+    @foreach (var role in Model.roles)
+    {
+        <tr>
+            <td>@role.Name</td>
+            <td>
+                <a asp-page="./Edit" asp-route-id="@role.Id" class="btn btn-primary">Cập nhật</a>
+                <a asp-page="./Delete" asp-route-id="@role.Id" class="btn btn-danger">Xóa</a>
+            </td>
+        </tr>
+    }
+</table>
+@* dotnet new page -n Create -o Areas/Admin/Pages/Role --namespace CS58.Areas.Admin.Pages.Role *@
