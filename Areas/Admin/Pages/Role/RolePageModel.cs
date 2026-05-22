@@ -11,12 +11,12 @@ namespace CS58.Areas.Admin.Pages.Role;
 public class RolePageModel : PageModel
 {
     protected readonly RoleManager<IdentityRole> _roleManager;
-    protected readonly MyBlogContext _myBlogContext;
+    protected readonly MyBlogContext _context;
     [TempData]
     public string StatusMessage { get; set; }
     public RolePageModel(RoleManager<IdentityRole> roleManager, MyBlogContext myBlogContext)
     {
         _roleManager = roleManager;
-        _myBlogContext = myBlogContext;
+        _context = myBlogContext;
     }
 }

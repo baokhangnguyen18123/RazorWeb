@@ -21,12 +21,15 @@ namespace CS58.Areas.Admin.Pages.User
         private readonly UserManager<AppUser> _userManager;
         private readonly SignInManager<AppUser> _signInManager;
         private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly MyBlogContext _context;
 
-        public AddRoleModel(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, RoleManager<IdentityRole> roleManager)
+        public AddRoleModel(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, RoleManager<IdentityRole> roleManager, MyBlogContext myBlogContext)
+        
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _roleManager = roleManager;
+            _context = myBlogContext;
         }
         [TempData]
         public string StatusMessage { get; set; }
@@ -36,6 +39,10 @@ namespace CS58.Areas.Admin.Pages.User
         [Display(Name = "Vai trò")]
         public string[] RoleNames { get; set; }
         public SelectList allRoles { get; set; }
+
+        public List<IdentityRoleClaim<string>> ClaimsInRole { get; set; }
+        public List<IdentityUserClaim<string>> ClaimsOfUser { get; set; }
+
         public async Task<IActionResult> OnGetAsync(string id)
         {
             if(string.IsNullOrEmpty(id))
@@ -50,7 +57,26 @@ namespace CS58.Areas.Admin.Pages.User
             RoleNames = (await _userManager.GetRolesAsync(user)).ToArray<string>();
             List<string> roleNames = await _roleManager.Roles.Select(r => r.Name).ToListAsync();
             allRoles = new SelectList(roleNames);
+            await GetClaims(id);
             return Page();
+        }
+        async Task GetClaims(string id)
+        {
+            var listRoles = from r in _context.Roles
+                            join ur in _context.UserRoles on r.Id equals ur.RoleId
+                            where ur.UserId == id
+                            select r;
+
+            var _claimsInRole = from c in _context.RoleClaims
+                                join r in listRoles on c.RoleId equals r.Id
+                                select c;
+            ClaimsInRole = await _claimsInRole.ToListAsync();
+
+            ClaimsOfUser = await (from c in _context.UserClaims
+                                where c.UserId == id
+                                select c).ToListAsync();
+
+
         }
 
         public async Task<IActionResult> OnPostAsync(string id)
@@ -71,13 +97,13 @@ namespace CS58.Areas.Admin.Pages.User
                 return NotFound($"Không tìm thấy thành viên có ID: '{id}'.");
             }
             //RoleNames
+            await GetClaims(id);
             var OldRoles = (await _userManager.GetRolesAsync(user)).ToArray();
             var deleteRoles = OldRoles.Where(r => !RoleNames.Contains(r));
             var addRoles = RoleNames.Where(r => !OldRoles.Contains(r));
 
             List<string> roleNames = await _roleManager.Roles.Select(r => r.Name).ToListAsync();
             allRoles = new SelectList(roleNames);
-
             var resultDelete = await _userManager.RemoveFromRolesAsync(user, deleteRoles);
             if(!resultDelete.Succeeded)
             {

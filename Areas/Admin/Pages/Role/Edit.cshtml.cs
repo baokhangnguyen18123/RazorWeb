@@ -4,10 +4,12 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
+using Org.BouncyCastle.Asn1.Pkcs;
 
 namespace CS58.Areas.Admin.Pages.Role
 {
-    [Authorize(Roles = "Admin")] 
+    [Authorize(Policy = "AllowEditRole")] 
     public class EditModel : RolePageModel
     {
         public EditModel(RoleManager<IdentityRole> roleManager, MyBlogContext myBlogContext) : base(roleManager, myBlogContext)
@@ -22,6 +24,9 @@ namespace CS58.Areas.Admin.Pages.Role
         }
         [BindProperty]
         public InputModel Input { get; set; }
+
+        public List<IdentityRoleClaim<string>> Claims { get; set; }
+
         public IdentityRole Role { get; set; }
         public async Task<IActionResult> OnGet(string id)
         {
@@ -37,6 +42,7 @@ namespace CS58.Areas.Admin.Pages.Role
                 {
                     Name = role.Name
                 };
+                Claims = await _context.RoleClaims.Where(rc => rc.RoleId == role.Id).ToListAsync();
                 this.Role = role;
                 return Page();
             }
@@ -60,7 +66,7 @@ namespace CS58.Areas.Admin.Pages.Role
             {
                 return NotFound("Không tìm thấy vai trò.");
             }
-
+            Claims = await _context.RoleClaims.Where(rc => rc.RoleId == role.Id).ToListAsync();
             // 2. Gán tên mới từ form Input
             role.Name = Input.Name;
 

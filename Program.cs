@@ -89,6 +89,21 @@ builder.Services.ConfigureApplicationCookie(options =>
 
 });
 
+builder.Services.AddAuthorization(options =>
+{
+   options.AddPolicy("AllowEditRole", policyBuilder =>
+   {    
+        // Policy based  on role authorization 
+        policyBuilder.RequireAuthenticatedUser();
+        // policyBuilder.RequireRole("Admin");
+        // policyBuilder.RequireRole("Editor");
+        // Policy based on claim authorization
+        policyBuilder.RequireClaim("manage_role", "add", "update", "True");
+        
+
+   });
+   
+});
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -116,5 +131,6 @@ IdentityDbContext context;
 app.Run();
 
 /*
+    dotnet new page --name EditUserRoleClaim --output Areas/Admin/Pages/User --namespace CS58.Areas.Admin.Pages.User
     dotnet aspnet-codegenerator razorpage -m CS58.Models.Article -dc CS58.Models.MyBlogContext -outDir Pages/Blog -udl --referenceScriptLibraries
 */

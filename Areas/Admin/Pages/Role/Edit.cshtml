@@ -34,6 +34,27 @@
                         </a>
                     </div>
                 </form>
+                <hr>
+                <p>Role Claims: 
+                    <a asp-page="./AddRoleClaim" asp-route-roleid="@Model.Role.Id" class="link-success">Thêm Claim</a>
+                </p>
+                @if(Model.Claims != null && Model.Claims.Count > 0)
+                {
+                    <ul>
+                        @foreach(var claim in Model.Claims)
+                        {
+
+                            <li>
+                                <a asp-page="./EditRoleClaim" asp-route-claimId="@claim.Id" >@claim.ClaimType : @claim.ClaimValue</a>
+                                
+                            </li>
+                        }
+                    </ul>
+                }
+                else
+                {
+                    <p><em>Không có claim nào.</em></p>
+                }
             </div>
         </div>
     </div>
