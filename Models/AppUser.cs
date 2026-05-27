@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using Bogus.DataSets;
 using Microsoft.AspNetCore.Identity;
 
-namespace CS58.Models
+namespace App.Models
 {
     public class AppUser: IdentityUser
     {

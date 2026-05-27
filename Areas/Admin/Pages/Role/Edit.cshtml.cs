@@ -1,5 +1,5 @@
 using System.ComponentModel.DataAnnotations;
-using CS58.Models;
+using App.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -7,12 +7,12 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using Org.BouncyCastle.Asn1.Pkcs;
 
-namespace CS58.Areas.Admin.Pages.Role
+namespace App.Areas.Admin.Pages.Role
 {
     [Authorize(Policy = "AllowEditRole")] 
     public class EditModel : RolePageModel
     {
-        public EditModel(RoleManager<IdentityRole> roleManager, MyBlogContext myBlogContext) : base(roleManager, myBlogContext)
+        public EditModel(RoleManager<IdentityRole> roleManager, AppDbContext myBlogContext) : base(roleManager, myBlogContext)
         {
         }
         public class InputModel

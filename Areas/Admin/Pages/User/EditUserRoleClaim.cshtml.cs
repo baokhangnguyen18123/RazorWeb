@@ -1,19 +1,19 @@
 using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
-using CS58.Models;
+using App.Models;
 using Humanizer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 
-namespace CS58.Areas.Admin.Pages.User
+namespace App.Areas.Admin.Pages.User
 {
     public class EditUserRoleClaimModel : PageModel
     {
-        private readonly MyBlogContext _context;
+        private readonly AppDbContext _context;
         private readonly UserManager<AppUser> _userManager;
-        public EditUserRoleClaimModel(MyBlogContext context, UserManager<AppUser> userManager)
+        public EditUserRoleClaimModel(AppDbContext context, UserManager<AppUser> userManager)
         {
             _context = context;
             _userManager = userManager;

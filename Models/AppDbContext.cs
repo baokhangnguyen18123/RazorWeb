@@ -2,16 +2,16 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Conventions;
 
-namespace CS58.Models;
+namespace App.Models;
 // CS58.Models.MyBlogContext
-public class MyBlogContext : IdentityDbContext<AppUser>
+public class AppDbContext : IdentityDbContext<AppUser>
 {
-    public MyBlogContext(DbContextOptions<MyBlogContext> options) : base(options)
+    public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
     {
         
     }
 
-    protected MyBlogContext()
+    protected AppDbContext()
     {
     }
 

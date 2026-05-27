@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Reflection.Metadata;
 
-namespace CS58.Models;
+namespace App.Models;
 //CS58.Models.Article
 public class Article
 {

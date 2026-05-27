@@ -1,11 +1,11 @@
-using CS58.Models;
+using App.Models;
 using MailKit.Net.Smtp;
 using MailKit.Security;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.Extensions.Options;
 using MimeKit;
 
-namespace CS58.Services // Thay thế bằng namespace của bạn
+namespace App.Services // Thay thế bằng namespace của bạn
 {
     public class SendMailService : IEmailSender
     {

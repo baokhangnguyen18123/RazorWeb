@@ -1,14 +1,14 @@
-using CS58.Models;
+using App.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace CS58.Pages;
+namespace App.Pages;
 
 public class IndexModel : PageModel
 {
-    private readonly MyBlogContext _myBlogContext;
+    private readonly AppDbContext _myBlogContext;
 
-    public IndexModel(MyBlogContext context)
+    public IndexModel(AppDbContext context)
     {
         _myBlogContext = context;
     }

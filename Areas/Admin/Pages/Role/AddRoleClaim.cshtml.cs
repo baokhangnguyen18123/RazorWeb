@@ -1,16 +1,16 @@
 using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
-using CS58.Models;
+using App.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace CS58.Areas.Admin.Pages.Role;
+namespace App.Areas.Admin.Pages.Role;
 [Authorize(Roles = "Admin")] 
 public class AddRoleClaimModel : RolePageModel
 {
-    public AddRoleClaimModel(RoleManager<IdentityRole> roleManager, MyBlogContext myBlogContext) : base(roleManager, myBlogContext)
+    public AddRoleClaimModel(RoleManager<IdentityRole> roleManager, AppDbContext myBlogContext) : base(roleManager, myBlogContext)
     {
         
     }

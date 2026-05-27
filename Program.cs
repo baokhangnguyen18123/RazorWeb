@@ -1,7 +1,10 @@
 using System.Configuration;
+using App.Security.Requirements;
 using App.Services;
-using CS58.Models;
-using CS58.Services;
+using App.Models;
+using App.Services;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity.UI.Services;
@@ -12,13 +15,13 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorPages();
-builder.Services.AddDbContext<MyBlogContext>(option =>
+builder.Services.AddDbContext<AppDbContext>(option =>
 {
     // builder.Configuration.GetConnectionString("MyBlogContext") get connection string in appSetting.json
     option.UseSqlServer(builder.Configuration.GetConnectionString("MyBlogContext"));
 });
 builder.Services.AddIdentity<AppUser, IdentityRole>()
-.AddEntityFrameworkStores<MyBlogContext>()
+.AddEntityFrameworkStores<AppDbContext>()
 .AddDefaultTokenProviders()
 .AddDefaultUI();
 // builder.Services.AddDefaultIdentity<AppUser>()
@@ -99,11 +102,25 @@ builder.Services.AddAuthorization(options =>
         // policyBuilder.RequireRole("Editor");
         // Policy based on claim authorization
         policyBuilder.RequireClaim("manage_role", "add", "update", "True");
-        
-
+   });
+   options.AddPolicy("IsGenZ", policyBuilder =>
+   {    
+        policyBuilder.RequireAuthenticatedUser();
+        // policyBuilder.RequireClaim("manage_role", "add", "update", "True");
+        policyBuilder.Requirements.Add(new GenZRequirements());   //GenZRequirements
+   });
+   options.AddPolicy("ShowAdminMenu", policyBuilder =>
+   {
+      policyBuilder.RequireRole("Admin");
+   });
+   options.AddPolicy("CanUpdateArticle", policyBuilder =>
+   {
+      policyBuilder.Requirements.Add(new ArticleUpdateRequirement());
    });
    
+   
 });
+builder.Services.AddTransient<IAuthorizationHandler, AppAuthorizationHandler>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

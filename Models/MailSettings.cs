@@ -1,4 +1,4 @@
-namespace CS58.Models // Thay thế bằng namespace của bạn
+namespace App.Models // Thay thế bằng namespace của bạn
 {
     public class MailSettings
     {

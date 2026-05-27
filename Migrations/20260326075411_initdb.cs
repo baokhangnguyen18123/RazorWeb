@@ -1,11 +1,11 @@
 ﻿using System;
 using Bogus;
-using CS58.Models;
+using App.Models;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace CS58.Migrations
+namespace App.Migrations
 {
     /// <inheritdoc />
     public partial class initdb : Migration

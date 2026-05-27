@@ -5,13 +5,13 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
-using CS58.Models;
+using App.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace CS58.Areas.Admin.Pages.User
+namespace App.Areas.Admin.Pages.User
 {
     [Authorize(Roles = "Admin")] 
     public class SetPasswordModel : PageModel

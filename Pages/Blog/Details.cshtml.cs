@@ -5,15 +5,17 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
-using CS58.Models;
+using App.Models;
+using Microsoft.AspNetCore.Authorization;
 
-namespace CS58.Pages_Blog
+namespace App.Pages_Blog
 {
+    [Authorize(Policy = "IsGenZ")]
     public class DetailsModel : PageModel
     {
-        private readonly CS58.Models.MyBlogContext _context;
+        private readonly App.Models.AppDbContext _context;
 
-        public DetailsModel(CS58.Models.MyBlogContext context)
+        public DetailsModel(App.Models.AppDbContext context)
         {
             _context = context;
         }

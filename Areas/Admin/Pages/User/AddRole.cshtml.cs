@@ -5,7 +5,7 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
-using CS58.Models;
+using App.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -13,7 +13,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 
-namespace CS58.Areas.Admin.Pages.User
+namespace App.Areas.Admin.Pages.User
 {
     [Authorize(Roles = "Admin")] 
     public class AddRoleModel : PageModel
@@ -21,9 +21,9 @@ namespace CS58.Areas.Admin.Pages.User
         private readonly UserManager<AppUser> _userManager;
         private readonly SignInManager<AppUser> _signInManager;
         private readonly RoleManager<IdentityRole> _roleManager;
-        private readonly MyBlogContext _context;
+        private readonly AppDbContext _context;
 
-        public AddRoleModel(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, RoleManager<IdentityRole> roleManager, MyBlogContext myBlogContext)
+        public AddRoleModel(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, RoleManager<IdentityRole> roleManager, AppDbContext myBlogContext)
         
         {
             _userManager = userManager;

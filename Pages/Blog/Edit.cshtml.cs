@@ -6,17 +6,20 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using CS58.Models;
+using App.Models;
+using Microsoft.AspNetCore.Authorization;
 
-namespace CS58.Pages_Blog
+namespace App.Pages_Blog
 {
     public class EditModel : PageModel
     {
-        private readonly CS58.Models.MyBlogContext _context;
+        private readonly App.Models.AppDbContext _context;
+        private readonly IAuthorizationService _authorizationService;
 
-        public EditModel(CS58.Models.MyBlogContext context)
+        public EditModel(App.Models.AppDbContext context,IAuthorizationService authorizationService)
         {
             _context = context;
+            _authorizationService = authorizationService;
         }
 
         [BindProperty]
@@ -51,7 +54,16 @@ namespace CS58.Pages_Blog
 
             try
             {
-                await _context.SaveChangesAsync();
+                // Authorization update on policy
+                var canUpdate = await _authorizationService.AuthorizeAsync(this.User, Article, "CanUpdateArticle");
+                if (canUpdate.Succeeded)
+                {
+                    await _context.SaveChangesAsync();
+                }
+                else
+                {
+                    return Content("Không được quyền cập nhật");
+                }
             }
             catch (DbUpdateConcurrencyException)
             {

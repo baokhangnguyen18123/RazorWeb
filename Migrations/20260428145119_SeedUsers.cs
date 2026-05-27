@@ -2,7 +2,7 @@
 
 #nullable disable
 
-namespace CS58.Migrations
+namespace App.Migrations
 {
     /// <inheritdoc />
     public partial class SeedUsers : Migration
